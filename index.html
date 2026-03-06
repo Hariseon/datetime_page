@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор даты и времени</title>
-    <!-- Подключаем скрипт Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -74,53 +73,82 @@
 
     <script>
         // Инициализация Telegram Web App
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Растягиваем на всю высоту
-        tg.MainButton.hide(); // Скрываем основную кнопку (если не нужна)
+        let tg = null;
+        
+        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.MainButton.hide();
+            console.log("Telegram Web App инициализирован");
+        } else {
+            console.error("Telegram Web App не доступен. Возможно, страница открыта вне Telegram.");
+            // Создаём заглушку для тестирования в браузере
+            tg = {
+                expand: () => {},
+                MainButton: { hide: () => {}, setText: () => {}, onClick: () => {}, show: () => {} },
+                showAlert: alert,
+                sendData: (data) => console.log("sendData (stub):", data),
+                close: () => {}
+            };
+        }
 
-        // Функция отправки данных
+        // Глобальная функция для кнопки
         function sendData() {
-            console.log("sendData started");
+            console.log("sendData вызвана");
             const dateTimeInput = document.getElementById('datetimePicker');
             const value = dateTimeInput.value;
-            console.log("value:", value);
-            
+            console.log("Выбранное значение:", value);
+
             if (!value) {
-                tg.showAlert('Пожалуйста, выберите дату и время');
+                if (tg && tg.showAlert) {
+                    tg.showAlert('Пожалуйста, выберите дату и время');
+                } else {
+                    alert('Пожалуйста, выберите дату и время');
+                }
                 return;
             }
-        
+
+            // Разбираем строку
             const [datePart, timePart] = value.split('T');
             const [year, month, day] = datePart.split('-');
             const [hour, minute] = timePart.split(':');
-        
+
             const data = {
-                date: { year: parseInt(year), month: parseInt(month), day: parseInt(day) },
-                time: { hour: parseInt(hour), minute: parseInt(minute) },
+                date: {
+                    year: parseInt(year),
+                    month: parseInt(month),
+                    day: parseInt(day)
+                },
+                time: {
+                    hour: parseInt(hour),
+                    minute: parseInt(minute)
+                },
                 iso: value,
                 timestamp: new Date(value).getTime() / 1000
             };
-            console.log("data prepared:", data);
-        
+            console.log("Данные для отправки:", data);
+
             try {
-                console.log("calling tg.sendData");
-                tg.sendData(JSON.stringify(data));
-                console.log("tg.sendData called successfully");
+                if (tg && tg.sendData) {
+                    tg.sendData(JSON.stringify(data));
+                    console.log("Данные отправлены успешно");
+                } else {
+                    console.error("tg.sendData не доступна");
+                }
             } catch (e) {
-                console.error("ERROR in sendData:", e);
+                console.error("Ошибка при отправке данных:", e);
+                if (tg && tg.showAlert) {
+                    tg.showAlert("Ошибка: " + e.message);
+                }
             }
         }
-            // Отправляем данные в бота
-            tg.sendData(JSON.stringify(data));
-            
-        }
 
-        // Можно также обработать нажатие основной кнопки Telegram, если хотите
-        tg.MainButton.setText('Выбрать');
-        tg.MainButton.onClick(sendData);
-        tg.MainButton.show();
+        // Настройка основной кнопки Telegram (опционально)
+        if (tg) {
+            tg.MainButton.setText('Выбрать');
+            tg.MainButton.onClick(sendData);
+            tg.MainButton.show();
+        }
     </script>
 </body>
-
 </html>
-
