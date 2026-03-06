@@ -80,34 +80,36 @@
 
         // Функция отправки данных
         function sendData() {
+            console.log("sendData started");
             const dateTimeInput = document.getElementById('datetimePicker');
-            const value = dateTimeInput.value; // Формат: "YYYY-MM-DDTHH:mm"
+            const value = dateTimeInput.value;
+            console.log("value:", value);
             
             if (!value) {
                 tg.showAlert('Пожалуйста, выберите дату и время');
                 return;
             }
-
-            // Разбираем строку на части (можно отправить как есть, но лучше структурировать)
+        
             const [datePart, timePart] = value.split('T');
             const [year, month, day] = datePart.split('-');
             const [hour, minute] = timePart.split(':');
-
-            // Формируем объект с данными
+        
             const data = {
-                date: {
-                    year: parseInt(year),
-                    month: parseInt(month),
-                    day: parseInt(day)
-                },
-                time: {
-                    hour: parseInt(hour),
-                    minute: parseInt(minute)
-                },
-                iso: value,          // полная строка для простоты
-                timestamp: new Date(value).getTime() / 1000 // Unix timestamp (секунды)
+                date: { year: parseInt(year), month: parseInt(month), day: parseInt(day) },
+                time: { hour: parseInt(hour), minute: parseInt(minute) },
+                iso: value,
+                timestamp: new Date(value).getTime() / 1000
             };
-
+            console.log("data prepared:", data);
+        
+            try {
+                console.log("calling tg.sendData");
+                tg.sendData(JSON.stringify(data));
+                console.log("tg.sendData called successfully");
+            } catch (e) {
+                console.error("ERROR in sendData:", e);
+            }
+        }
             // Отправляем данные в бота
             tg.sendData(JSON.stringify(data));
             
@@ -121,3 +123,4 @@
 </body>
 
 </html>
+
