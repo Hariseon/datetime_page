@@ -72,7 +72,6 @@
     </div>
 
     <script>
-        // Инициализация Telegram Web App
         let tg = null;
         
         if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
@@ -82,7 +81,6 @@
             console.log("Telegram Web App инициализирован");
         } else {
             console.error("Telegram Web App не доступен. Возможно, страница открыта вне Telegram.");
-            // Создаём заглушку для тестирования в браузере
             tg = {
                 expand: () => {},
                 MainButton: { hide: () => {}, setText: () => {}, onClick: () => {}, show: () => {} },
@@ -92,7 +90,6 @@
             };
         }
 
-        // Глобальная функция для кнопки
         function sendData() {
             console.log("sendData вызвана");
             const dateTimeInput = document.getElementById('datetimePicker');
@@ -108,7 +105,6 @@
                 return;
             }
 
-            // Разбираем строку
             const [datePart, timePart] = value.split('T');
             const [year, month, day] = datePart.split('-');
             const [hour, minute] = timePart.split(':');
@@ -143,7 +139,6 @@
             }
         }
 
-        // Настройка основной кнопки Telegram (опционально)
         if (tg) {
             tg.MainButton.setText('Выбрать');
             tg.MainButton.onClick(sendData);
